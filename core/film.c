@@ -5,6 +5,7 @@
 #include "properties.h"
 #include "gui.h"
 #include "gui_draw.h"
+#include "keyboard.h"
 #include "film.h"
 
 /*
@@ -33,25 +34,24 @@
 
 const film_stock_t film_stocks[] =
 {
-    //  name               tag         my_colors    sat       contrast  lift      white      shadow tint R,G,B                highlight tint R,G,B              grain size vignette
-    { "Off",               "",         -1,          Q(1.00),  Q(0.00),  Q(0.000), Q(1.000), { 0, 0, 0 },                    { 0, 0, 0 },                     0, 0, 0 },
-    { "Portra 400",        "PORTRA",   MC_OFF,      Q(0.90),  Q(0.08),  Q(0.030), Q(0.975), { Q(0.010),  Q(0.004), Q(-0.004) }, { Q(0.016),  Q(0.006), Q(-0.018) }, 3, 0, 0 },
-    { "Ektar 100",         "EKTAR",    MC_VIVID,    Q(1.15),  Q(0.18),  Q(0.000), Q(1.000), { Q(-0.004), Q(0.000), Q(0.010) },  { Q(0.010),  Q(0.004), Q(-0.008) }, 1, 0, 0 },
-    { "Gold 200",          "GOLD",     MC_OFF,      Q(1.05),  Q(0.12),  Q(0.020), Q(0.985), { Q(0.012),  Q(0.006), Q(-0.006) }, { Q(0.026),  Q(0.014), Q(-0.030) }, 3, 0, 0 },
-    { "Superia 400",       "SUPERIA",  MC_OFF,      Q(1.00),  Q(0.12),  Q(0.025), Q(0.980), { Q(-0.010), Q(0.012), Q(0.006) },  { Q(0.000),  Q(0.004), Q(0.006) },  4, 0, 0 },
-    { "Velvia 50",         "VELVIA",   MC_POSITIVE, Q(1.30),  Q(0.28),  Q(0.000), Q(1.000), { Q(-0.004), Q(-0.006), Q(0.012) }, { Q(0.006),  Q(0.000), Q(-0.006) }, 1, 0, Q(0.10) },
-    { "Ektachrome E100",   "E100",     MC_OFF,      Q(1.12),  Q(0.20),  Q(0.000), Q(1.000), { Q(-0.006), Q(0.000), Q(0.016) },  { Q(-0.004), Q(0.002), Q(0.012) },  1, 0, 0 },
-    { "Cinestill 800T",    "800T",     MC_OFF,      Q(1.00),  Q(0.14),  Q(0.020), Q(0.985), { Q(-0.012), Q(0.010), Q(0.030) },  { Q(0.012),  Q(0.000), Q(-0.004) }, 6, 1, 0 },
-    { "Tri-X 400",         "TRI-X",    MC_BW,       Q(0.00),  Q(0.25),  Q(0.010), Q(1.000), { 0, 0, 0 },                    { 0, 0, 0 },                     6, 1, 0 },
-    { "HP5 Plus",          "HP5",      MC_BW,       Q(0.00),  Q(0.12),  Q(0.030), Q(0.980), { 0, 0, 0 },                    { 0, 0, 0 },                     7, 2, 0 },
-    { "T-Max 100",         "T-MAX",    MC_BW,       Q(0.00),  Q(0.15),  Q(0.000), Q(1.000), { 0, 0, 0 },                    { 0, 0, 0 },                     2, 0, 0 },
-    { "Expired Lomo",      "LOMO",     MC_OFF,      Q(1.20),  Q(0.25),  Q(0.060), Q(0.950), { Q(-0.016), Q(0.010), Q(0.020) },  { Q(0.024),  Q(0.016), Q(-0.024) }, 7, 2, Q(0.45) },
+    //  name               tag        description                                 my_colors    sat       contrast  lift      white      shadow tint R,G,B                highlight tint R,G,B              grain size vignette
+    { "Off",              "",        "No film look, camera colour only",         -1,          Q(1.00),  Q(0.00),  Q(0.000), Q(1.000), { 0, 0, 0 },                    { 0, 0, 0 },                     0, 0, 0 },
+    { "Portra 400",       "PORTRA",  "Soft contrast, warm skin, lifted blacks",  MC_OFF,      Q(0.90),  Q(0.08),  Q(0.030), Q(0.975), { Q(0.010),  Q(0.004), Q(-0.004) }, { Q(0.016),  Q(0.006), Q(-0.018) }, 3, 0, 0 },
+    { "Ektar 100",        "EKTAR",   "Punchy colour, fine grain",                MC_VIVID,    Q(1.15),  Q(0.18),  Q(0.000), Q(1.000), { Q(-0.004), Q(0.000), Q(0.010) },  { Q(0.010),  Q(0.004), Q(-0.008) }, 1, 0, 0 },
+    { "Gold 200",         "GOLD",    "Warm golden highlights",                   MC_OFF,      Q(1.05),  Q(0.12),  Q(0.020), Q(0.985), { Q(0.012),  Q(0.006), Q(-0.006) }, { Q(0.026),  Q(0.014), Q(-0.030) }, 3, 0, 0 },
+    { "Superia 400",      "SUPERIA", "Green shadows, cool everyday colour",      MC_OFF,      Q(1.00),  Q(0.12),  Q(0.025), Q(0.980), { Q(-0.010), Q(0.012), Q(0.006) },  { Q(0.000),  Q(0.004), Q(0.006) },  4, 0, 0 },
+    { "Velvia 50",        "VELVIA",  "Vivid slide film, deep contrast",          MC_POSITIVE, Q(1.30),  Q(0.28),  Q(0.000), Q(1.000), { Q(-0.004), Q(-0.006), Q(0.012) }, { Q(0.006),  Q(0.000), Q(-0.006) }, 1, 0, Q(0.10) },
+    { "Ektachrome E100",  "E100",    "Clean slide film, cool blues",             MC_OFF,      Q(1.12),  Q(0.20),  Q(0.000), Q(1.000), { Q(-0.006), Q(0.000), Q(0.016) },  { Q(-0.004), Q(0.002), Q(0.012) },  1, 0, 0 },
+    { "Cinestill 800T",   "800T",    "Tungsten night film, teal shadows",        MC_OFF,      Q(1.00),  Q(0.14),  Q(0.020), Q(0.985), { Q(-0.012), Q(0.010), Q(0.030) },  { Q(0.012),  Q(0.000), Q(-0.004) }, 6, 1, 0 },
+    { "Tri-X 400",        "TRI-X",   "Contrasty black & white, classic grain",   MC_BW,       Q(0.00),  Q(0.25),  Q(0.010), Q(1.000), { 0, 0, 0 },                    { 0, 0, 0 },                     6, 1, 0 },
+    { "HP5 Plus",         "HP5",     "Soft black & white, coarse grain",         MC_BW,       Q(0.00),  Q(0.12),  Q(0.030), Q(0.980), { 0, 0, 0 },                    { 0, 0, 0 },                     7, 2, 0 },
+    { "T-Max 100",        "T-MAX",   "Smooth, fine black & white",               MC_BW,       Q(0.00),  Q(0.15),  Q(0.000), Q(1.000), { 0, 0, 0 },                    { 0, 0, 0 },                     2, 0, 0 },
+    { "Expired Lomo",     "LOMO",    "Faded, cross-processed, dark corners",     MC_OFF,      Q(1.20),  Q(0.25),  Q(0.060), Q(0.950), { Q(-0.016), Q(0.010), Q(0.020) },  { Q(0.024),  Q(0.016), Q(-0.024) }, 7, 2, Q(0.45) },
 };
 
 const int film_stock_count = sizeof(film_stocks)/sizeof(film_stocks[0]);
 
-static const char *grain_names[] = { "Stock", "Off", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
-static const char *size_names[]  = { "Stock", "Fine", "Medium", "Coarse" };
+static const char *size_names[]  = { "Auto", "Fine", "Medium", "Coarse" };
 
 //-------------------------------------------------------------------
 // Settings helpers
@@ -73,6 +73,39 @@ static int grain_size()
 {
     if (conf.film_grain_size == FILM_SIZE_STOCK) return current_stock()->grain_size;
     return conf.film_grain_size - 1;
+}
+
+// Each film brings its own grain, so changing stock goes back to the stock's grain
+static void set_stock(int i)
+{
+    if (i < 0) i = film_stock_count - 1;
+    if (i >= film_stock_count) i = 0;
+    conf.film_stock = i;
+    conf.film_grain = FILM_GRAIN_STOCK;
+    conf.film_grain_size = FILM_SIZE_STOCK;
+    film_settings_changed();
+}
+
+static void set_grain(int amount)
+{
+    if (amount < 0) amount = 0;
+    if (amount > 10) amount = 10;
+    conf.film_grain = amount + 1;
+}
+
+static const char* grain_text()
+{
+    static char buf[16];
+    int a = grain_amount();
+    if (a == 0) strcpy(buf, "Off");
+    else sprintf(buf, "%d", a);
+    if (conf.film_grain == FILM_GRAIN_STOCK) strcat(buf, " (auto)");
+    return buf;
+}
+
+static const char* raw_text()
+{
+    return !conf.save_raw ? "Off" : conf.dng_raw ? "DNG" : "CRW";
 }
 
 //-------------------------------------------------------------------
@@ -221,6 +254,56 @@ static inline void pack8(unsigned char *b, const int *p)
 #endif
 
 //-------------------------------------------------------------------
+// "Developing" card shown while a shot is processed. Drawn from the capture
+// task straight onto the bitmap overlay; the GUI restores the screen afterwards.
+
+#define DEV_W   240
+#define DEV_H   84
+#define BAR_H   4
+
+static int dev_x, dev_y, dev_bar_drawn;
+
+static void dev_card_begin(int amount, int size)
+{
+    static char buf[40];
+    dev_x = camera_screen.disp_left + (camera_screen.disp_width - DEV_W) / 2;
+    dev_y = (camera_screen.height - DEV_H) / 2;
+    dev_bar_drawn = 0;
+
+    draw_rectangle(dev_x, dev_y, dev_x+DEV_W-1, dev_y+DEV_H-1, MAKE_COLOR(COLOR_BLACK, COLOR_GREY_DK), RECT_BORDER1|DRAW_FILLED|RECT_ROUND_CORNERS);
+    draw_string(dev_x+12, dev_y+8, "DEVELOPING", MAKE_COLOR(COLOR_BLACK, COLOR_RED));
+    if (conf.save_raw)
+        draw_string_justified(dev_x+12, dev_y+8, conf.dng_raw ? "+ DNG" : "+ CRW", MAKE_COLOR(COLOR_BLACK, COLOR_GREY), 0, DEV_W-24, TEXT_RIGHT);
+    draw_string(dev_x+12, dev_y+28, current_stock()->name, MAKE_COLOR(COLOR_BLACK, COLOR_WHITE));
+    if (amount > 0)
+        sprintf(buf, "Grain %d, %s", amount, size+1 == 1 ? "fine" : size+1 == 2 ? "medium" : "coarse");
+    else
+        strcpy(buf, "No grain");
+    if (current_stock()->vignette && conf.film_vignette) strcat(buf, "  Vignette");
+    draw_string(dev_x+12, dev_y+46, buf, MAKE_COLOR(COLOR_BLACK, COLOR_GREY));
+    draw_rectangle(dev_x+12, dev_y+68, dev_x+DEV_W-13, dev_y+68+BAR_H-1, MAKE_COLOR(COLOR_GREY_DK, COLOR_GREY_DK), RECT_BORDER0|DRAW_FILLED);
+}
+
+static void dev_card_progress(int done, int total)
+{
+    int w = (DEV_W - 24) * done / total;
+    if (w > dev_bar_drawn)
+    {
+        draw_rectangle(dev_x+12+dev_bar_drawn, dev_y+68, dev_x+12+w-1, dev_y+68+BAR_H-1, MAKE_COLOR(COLOR_RED, COLOR_RED), RECT_BORDER0|DRAW_FILLED);
+        dev_bar_drawn = w;
+    }
+}
+
+#ifdef FILM_HOST_PREVIEW
+// lets film-tools/host/ui_preview render the card without a raw buffer
+void film_ui_preview_dev_card(int done, int total)
+{
+    dev_card_begin(grain_amount(), grain_size());
+    dev_card_progress(done, total);
+}
+#endif
+
+//-------------------------------------------------------------------
 
 void film_apply(void)
 {
@@ -308,6 +391,10 @@ void film_apply(void)
         if (!rng_state) rng_state = 0x9E3779B9;
     }
 
+    int show_dev = conf.film_dev_screen;
+    if (show_dev)
+        dev_card_begin(amount, gsize);
+
     // Vignette: separable falloff, per quad column and per row pair
     int vig = s->vignette;
     if (conf.film_vignette == 0) vig = 0;
@@ -332,6 +419,9 @@ void film_apply(void)
 
     for (y = y0; y < y1; y += 2)
     {
+        if (show_dev && ((y - y0) & 63) == 0)
+            dev_card_progress(y - y0, y1 - y0);
+
         unsigned char *ra = raw + y*rowlen + x0*GROUP_BYTES;
         unsigned char *rb = ra + rowlen;
         int vy = ONE;
@@ -418,6 +508,12 @@ void film_apply(void)
 
     if (nrow) free(nrow);
     if (vx) free(vx);
+
+    if (show_dev)
+    {
+        dev_card_progress(1, 1);
+        gui_set_need_restore();
+    }
 #endif
 }
 
@@ -469,7 +565,7 @@ void film_draw_osd(int is_osd_edit)
     if (amount > 0)
         sprintf(buf + strlen(buf), "  G%d", amount);
     if (conf.save_raw)
-        strcat(buf, conf.dng_raw ? "  DNG" : "  RAW");
+        sprintf(buf + strlen(buf), "  %s", raw_text());
 
     int w = strlen(buf) * FONT_WIDTH;
     int h = FONT_HEIGHT;
@@ -482,38 +578,158 @@ void film_draw_osd(int is_osd_edit)
 }
 
 //-------------------------------------------------------------------
+// Film picker: what the ALT button shows in record mode.
+//
+//   FILM                                4 / 11
+//   <        Superia 400                     >
+//        Green shadows, cool everyday colour
+//   ------------------------------------------
+//   GRAIN  [##########]  4 (auto)       Medium
+//   RAW    DNG
+//   <> film   ^v grain   SET size   DISP raw
+
+#define PK_H        140
+#define PK_PAD      12
+
+int film_picker_active(void)
+{
+    return camera_info.state.mode_rec && !camera_info.state.mode_video && !camera_info.state.state_kbd_script_run;
+}
+
+static int raw_key_free()
+{
+    return conf.alt_mode_button != KEY_DISPLAY;
+}
+
+void film_picker_draw(int force_redraw)
+{
+    static int last_sig = -1, ticks = 0;
+    int sig = (conf.film_stock << 16) | (conf.film_grain << 8) | (conf.film_grain_size << 4) | (conf.save_raw << 1) | conf.dng_raw;
+
+    // Redraw on change, on request, and now and then in case Canon's OSD drew over us
+    if (!force_redraw && sig == last_sig && (++ticks & 31))
+        return;
+    last_sig = sig;
+
+    static char buf[48];
+    const film_stock_t *s = current_stock();
+    int x = camera_screen.disp_left + 8;
+    int w = camera_screen.disp_width - 16;
+    int y = camera_screen.height - FONT_HEIGHT - PK_H - 4;
+    int ix = x + PK_PAD, iw = w - 2*PK_PAD;
+    twoColors label = MAKE_COLOR(COLOR_BLACK, COLOR_GREY);
+    twoColors value = MAKE_COLOR(COLOR_BLACK, COLOR_WHITE);
+    twoColors accent = MAKE_COLOR(COLOR_BLACK, COLOR_RED);
+
+    draw_rectangle(x, y, x+w-1, y+PK_H-1, MAKE_COLOR(COLOR_BLACK, COLOR_GREY_DK), RECT_BORDER1|DRAW_FILLED|RECT_ROUND_CORNERS);
+
+    // header
+    draw_string(ix, y+6, "FILM", label);
+    sprintf(buf, "%d / %d", conf.film_stock, film_stock_count-1);
+    draw_string_justified(ix, y+6, conf.film_stock ? buf : "OFF", label, 0, iw, TEXT_RIGHT);
+
+    // stock name, double size, with arrows
+    int nl = strlen(s->name);
+    int sc = (nl * FONT_WIDTH * 2 <= iw - 2*FONT_WIDTH*2) ? 2 : 1;
+    int nw = nl * FONT_WIDTH * sc;
+    int ny = y + 24 + (sc == 1 ? FONT_HEIGHT/2 : 0);
+    draw_string_scaled(ix, y+24+FONT_HEIGHT/2, "<", accent, 1, 1);
+    draw_string_scaled(ix+iw-FONT_WIDTH, y+24+FONT_HEIGHT/2, ">", accent, 1, 1);
+    draw_string_scaled(ix + (iw - nw)/2, ny, s->name, value, sc, sc);
+
+    // description
+    draw_string_justified(ix, y+60, s->desc, label, 0, iw, TEXT_CENTER);
+
+    draw_hline(ix, y+80, iw, COLOR_GREY_DK);
+
+    // grain: segmented meter + amount + size
+    int amount = grain_amount();
+    draw_string(ix, y+86, "GRAIN", label);
+    int bx = ix + 7*FONT_WIDTH, i;
+    for (i = 0; i < 10; i++)
+    {
+        color c = (i < amount) ? COLOR_RED : COLOR_GREY_DK;
+        draw_rectangle(bx + i*9, y+90, bx + i*9 + 6, y+97, MAKE_COLOR(c, c), RECT_BORDER0|DRAW_FILLED);
+    }
+    draw_string(bx + 96, y+86, grain_text(), value);
+    draw_string_justified(ix, y+86, amount ? size_names[grain_size()+1] : "", label, 0, iw, TEXT_RIGHT);
+
+    // raw
+    draw_string(ix, y+104, "RAW", label);
+    draw_string(bx, y+104, raw_text(), value);
+
+    // key hints
+    sprintf(buf, "<> film  ^v grain  SET size%s", raw_key_free() ? "  DISP raw" : "");
+    draw_string_justified(ix, y+122, buf, label, 0, iw, TEXT_CENTER);
+}
+
+int film_picker_kbd(void)
+{
+    if (!film_picker_active())
+        return 0;
+
+    switch (kbd_get_autoclicked_key())
+    {
+    case KEY_RIGHT: set_stock(conf.film_stock + 1); return 1;
+    case KEY_LEFT:  set_stock(conf.film_stock - 1); return 1;
+    case KEY_UP:    set_grain(grain_amount() + 1);  return 1;
+    case KEY_DOWN:  set_grain(grain_amount() - 1);  return 1;
+    }
+
+    if (kbd_is_key_clicked(KEY_SET))
+    {
+        conf.film_grain_size = (grain_size() + 1) % 3 + 1;
+        return 1;
+    }
+    if (raw_key_free() && kbd_is_key_clicked(KEY_DISPLAY))
+    {
+        gui_film_raw_enum(1, 0);
+        return 1;
+    }
+    return 0;
+}
+
+//-------------------------------------------------------------------
 // Menu
 
 const char* gui_film_stock_enum(int change, __attribute__ ((unused))int arg)
 {
-    gui_enum_value_change(&conf.film_stock, change, film_stock_count);
     if (change)
-        film_settings_changed();
+        set_stock(conf.film_stock + change);
     return current_stock()->name;
 }
 
+// Auto (stock default), Off, 1..10
 const char* gui_film_grain_enum(int change, __attribute__ ((unused))int arg)
 {
-    gui_enum_value_change(&conf.film_grain, change, sizeof(grain_names)/sizeof(grain_names[0]));
-    if (conf.film_grain == FILM_GRAIN_STOCK)
-    {
-        static char buf[12];
-        sprintf(buf, "Stock %d", current_stock()->grain);
-        return buf;
-    }
-    return grain_names[conf.film_grain];
+    gui_enum_value_change(&conf.film_grain, change, 12);
+    return grain_text();
 }
 
 const char* gui_film_grain_size_enum(int change, __attribute__ ((unused))int arg)
 {
-    gui_enum_value_change(&conf.film_grain_size, change, sizeof(size_names)/sizeof(size_names[0]));
+    static char buf[20];
+    gui_enum_value_change(&conf.film_grain_size, change, 4);
+    if (conf.film_grain_size == FILM_SIZE_STOCK)
+    {
+        sprintf(buf, "%s (auto)", size_names[grain_size()+1]);
+        return buf;
+    }
     return size_names[conf.film_grain_size];
+}
+
+const char* gui_film_vignette_enum(int change, __attribute__ ((unused))int arg)
+{
+    static const char *modes[] = { "Off", "Auto" };
+    gui_enum_value_change(&conf.film_vignette, change, 2);
+    if (conf.film_vignette && !current_stock()->vignette)
+        return "Auto (none)";
+    return modes[conf.film_vignette];
 }
 
 // RAW: Off / DNG / CRW maps onto the existing save_raw + dng_raw settings
 const char* gui_film_raw_enum(int change, __attribute__ ((unused))int arg)
 {
-    static const char *modes[] = { "Off", "DNG", "CRW" };
     int v = !conf.save_raw ? 0 : conf.dng_raw ? 1 : 2;
     gui_enum_value_change(&v, change, 3);
     if (change)
@@ -522,5 +738,5 @@ const char* gui_film_raw_enum(int change, __attribute__ ((unused))int arg)
         if (v) conf.dng_raw = (v == 1);
         conf_change_dng();
     }
-    return modes[v];
+    return raw_text();
 }

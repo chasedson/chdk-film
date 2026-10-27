@@ -24,28 +24,35 @@ Like stock CHDK it runs from the SD card only. Nothing is written to the camera,
 
 ## On the camera
 
-Press the **Print** button to enter `<ALT>` mode, then **MENU**:
+### Film picker
 
-```
-chdk-film
- FILM ──────────────
-  Stock          Portra 400
-  Grain          Stock 3
-  Grain size     Stock
-  Vignette       ●
- CAPTURE ───────────
-  RAW            Off / DNG / CRW
-  Match camera colour
-  Film badge
- ───────────────────
-  All CHDK settings  →
-```
+Press **Print** in shooting mode and a film picker appears:
 
-- **Grain** – `Stock` uses the stock's own amount, or set `Off` / `1`–`10`.
-- **Grain size** – `Stock`, `Fine`, `Medium`, `Coarse`.
-- **Match camera colour** – sets Canon's *My Colors* to suit the stock (B/W for the black and white stocks, Positive Film for Velvia, Vivid for Ektar) when you change stock. Use **P** mode: Auto ignores My Colors.
-- **Film badge** – the `● PORTRA  G3  DNG` pill at the top of the shooting screen.
-- **All CHDK settings** – the full stock CHDK menu, untouched.
+![film picker](film-tools/ui-picker_portra.png)
+
+| Key | Does |
+|---|---|
+| ◀ ▶ | change film (grain resets to that film's own) |
+| ▲ ▼ | grain amount, Off to 10 |
+| SET | grain size: fine, medium, coarse |
+| DISP | RAW: Off, DNG, CRW |
+| MENU | all settings |
+| Print | back to shooting |
+
+### Developing
+
+While a shot is processed, a card shows the film, grain and progress:
+
+![developing card](film-tools/ui-developing.png)
+
+### Menu
+
+Print, then **MENU**:
+
+- **FILM**: Film stock, Grain (`auto` uses the film's own amount), Grain size, Vignette (`Auto` = only films that have one)
+- **CAPTURE**: Save RAW (Off / DNG / CRW); Auto camera colour (sets Canon *My Colors* to suit the film, e.g. B/W for Tri-X. Use **P** mode: Auto ignores My Colors)
+- **SCREEN**: Film badge (`● PORTRA  G3  DNG` at the top of the screen), Developing card
+- **All CHDK settings**: the full stock CHDK menu
 
 Each shot takes a second or two longer to save while the film is developed.
 
@@ -67,19 +74,23 @@ Everything is integer maths, roughly 24 KB of lookup tables.
 Needs an ARM GCC (`brew install arm-none-eabi-gcc`) and GNU make.
 
 ```bash
-make PLATFORM=a570 PLATFORMSUB=101a fir
+make PLATFORM=a570 PLATFORMSUB=101a DISABLE_GCC_VERSION_CHECK=1 fir
 ```
 
 The build ends up in `bin/`. Copy `DISKBOOT.BIN` and the `CHDK/` folder to the card.
 
 ### Previewing looks on a Mac
 
-`film-tools/host` compiles the same `film.c` for the Mac. It simulates an A570 raw frame from any image and renders every stock plus a contact sheet:
+`film-tools/host` compiles the same `film.c` for the Mac:
+
+- `preview` simulates an A570 raw frame from any image and renders every stock plus a contact sheet
+- `ui_preview` draws the picker, badge and developing card at the camera's 360×240 with CHDK's font
 
 ```bash
 film-tools/host/build.sh /tmp/filmprev
 sips -s format bmp photo.jpg --out /tmp/in.bmp
 /tmp/filmprev/preview /tmp/in.bmp /tmp/filmprev
+/tmp/filmprev/ui_preview /tmp/in.bmp /tmp/filmprev
 ```
 
 ## Source

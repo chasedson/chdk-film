@@ -474,6 +474,7 @@ typedef struct
     int film_vignette;          // 0 = off, 1 = as stock
     int film_osd;               // show film badge on shooting screen
     int film_camera_color;      // set Canon My Colors to match the stock
+    int film_dev_screen;        // show "developing" card while a shot is processed
 
     // RAW EV Histogram
     int raw_ev_histo_enable;

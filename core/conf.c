@@ -553,6 +553,7 @@ static ConfInfo conf_info[] = {
     CONF_INFO(273, conf.film_vignette,                          CONF_DEF_VALUE, i:1),
     CONF_INFO(274, conf.film_osd,                               CONF_DEF_VALUE, i:1),
     CONF_INFO(275, conf.film_camera_color,                      CONF_DEF_VALUE, i:1),
+    CONF_INFO(276, conf.film_dev_screen,                        CONF_DEF_VALUE, i:1),
 
     CONF_INFO(999, conf.script_allow_lua_native_calls,          CONF_DEF_VALUE, i:0),
 

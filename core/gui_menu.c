@@ -764,6 +764,12 @@ static void gui_set_int_cursor(int offset)
 // Common code extracted from gui_menu_draw for displaying an int, enum or bool value on the right
 static void gui_menu_draw_value(const char *str, int len_str)
 {
+    // let longer values (film names) take up to half the row instead of being clipped
+    if (len_str == len_enum)
+    {
+        int vw = rbf_str_width(str);
+        if (vw > len_str) len_str = (vw < w/2) ? vw : w/2;
+    }
     int sw = gui_menu_draw_symbol();
     xx += rbf_draw_string_len(xx, yy, w-len_space*2-len_br-len_str-sw, lang_str(curr_menu->menu[imenu].text), cl);
     xx += rbf_draw_string(xx, yy, "  ", cl);

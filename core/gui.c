@@ -2209,20 +2209,23 @@ static CMenu chdk_all_menu = {0x20,(int)"All CHDK settings", chdk_all_menu_items
 // Film menu - the root of this build. Everything stock CHDK offers lives one level down.
 static CMenuItem root_menu_items[] = {
     MENU_ITEM   (0x0 ,(int)"FILM",                          MENUITEM_SEPARATOR,     0, 0 ),
-    MENU_ITEM   (0x5f,(int)"Stock",                         MENUITEM_ENUM,          gui_film_stock_enum, 0 ),
+    MENU_ITEM   (0x5f,(int)"Film stock",                    MENUITEM_ENUM,          gui_film_stock_enum, 0 ),
     MENU_ITEM   (0x5f,(int)"Grain",                         MENUITEM_ENUM,          gui_film_grain_enum, 0 ),
     MENU_ITEM   (0x5f,(int)"Grain size",                    MENUITEM_ENUM,          gui_film_grain_size_enum, 0 ),
-    MENU_ITEM   (0x5c,(int)"Vignette",                      MENUITEM_BOOL,          &conf.film_vignette, 0 ),
+    MENU_ITEM   (0x5f,(int)"Vignette",                      MENUITEM_ENUM,          gui_film_vignette_enum, 0 ),
     MENU_ITEM   (0x0 ,(int)"CAPTURE",                       MENUITEM_SEPARATOR,     0, 0 ),
-    MENU_ITEM   (0x24,(int)"RAW",                           MENUITEM_ENUM,          gui_film_raw_enum, 0 ),
-    MENU_ITEM   (0x5c,(int)"Match camera colour",           MENUITEM_BOOL,          &conf.film_camera_color, 0 ),
+    MENU_ITEM   (0x24,(int)"Save RAW",                      MENUITEM_ENUM,          gui_film_raw_enum, 0 ),
+    MENU_ITEM   (0x5c,(int)"Auto camera colour",            MENUITEM_BOOL,          &conf.film_camera_color, 0 ),
+    MENU_ITEM   (0x0 ,(int)"SCREEN",                        MENUITEM_SEPARATOR,     0, 0 ),
     MENU_ITEM   (0x5c,(int)"Film badge",                    MENUITEM_BOOL,          &conf.film_osd, 0 ),
+    MENU_ITEM   (0x5c,(int)"Developing card",               MENUITEM_BOOL,          &conf.film_dev_screen, 0 ),
     MENU_ITEM   (0x0 ,(int)"",                              MENUITEM_SEPARATOR,     0, 0 ),
     MENU_ITEM   (0x20,(int)"All CHDK settings",             MENUITEM_SUBMENU,       &chdk_all_menu, 0 ),
+    MENU_ITEM   (0x0 ,(int)"PRINT: quick film picker",      MENUITEM_TEXT,          0, 0 ),
     {0}
 };
 
-CMenu root_menu = {0x20,(int)"chdk-film", root_menu_items };
+CMenu root_menu = {0x20,(int)"FILM", root_menu_items };
 
 //-------------------------------------------------------------------
 
@@ -2641,6 +2644,9 @@ static void gui_draw_alt_helper()
 
 void gui_chdk_draw(int force_redraw)
 {
+    if (film_picker_active())
+        film_picker_draw(force_redraw);
+    else
 #ifdef CAM_DISP_ALT_TEXT
     gui_draw_alt_helper();
 #else
@@ -2793,6 +2799,9 @@ int gui_chdk_kbd_process()
     // Process Shutter Half Press + BUTTON shortcuts
     gui_kbd_shortcuts();
     if (camera_info.state.is_shutter_half_press) return 0;
+
+    // Film picker owns the arrows, SET and DISP in record mode
+    if (film_picker_kbd()) return 0;
 
     int reset_helper = 0;
 

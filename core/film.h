@@ -12,6 +12,7 @@ typedef struct
 {
     const char *name;       // full name shown in menu
     const char *tag;        // short name for the on-screen badge
+    const char *desc;       // one line description for the picker
     short my_colors;        // Canon My Colors mode to select (-1 = leave alone)
     short saturation;       // Q12, 4096 = unchanged, 0 = monochrome
     short contrast;         // Q12 S-curve strength around mid grey
@@ -30,11 +31,15 @@ extern const int film_stock_count;
 extern void film_apply(void);                   // raw hook: process current raw buffer
 extern void film_settings_changed(void);        // invalidate cached curves, re-apply camera colours
 extern void film_draw_osd(int is_osd_edit);     // shooting screen badge
+extern int  film_picker_active(void);           // ALT mode shows the picker (record mode, no script)
+extern void film_picker_draw(int force_redraw); // film picker card drawn in ALT mode
+extern int  film_picker_kbd(void);              // returns 1 if the key was handled
 
 // Menu enum handlers
 extern const char* gui_film_stock_enum(int change, int arg);
 extern const char* gui_film_grain_enum(int change, int arg);
 extern const char* gui_film_grain_size_enum(int change, int arg);
 extern const char* gui_film_raw_enum(int change, int arg);
+extern const char* gui_film_vignette_enum(int change, int arg);
 
 #endif

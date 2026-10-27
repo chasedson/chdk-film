@@ -21,6 +21,9 @@ char *get_raw_image_addr(void) { return (char*)rawbuf; }
 long get_tick_count(void) { return (long)clock(); }
 void shooting_set_prop(int id, int v) { (void)id; (void)v; }
 void conf_change_dng(void) {}
+void gui_set_need_restore(void) {}
+long kbd_get_autoclicked_key(void) { return 0; }
+long kbd_is_key_clicked(long key) { (void)key; return 0; }
 void gui_enum_value_change(int *value, int change, int num_items)
 {
     *value += change;
