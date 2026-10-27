@@ -51,7 +51,7 @@ Print, then **MENU**:
 
 - **FILM**: Film stock, Grain (`auto` uses the film's own amount), Grain size, Vignette (`Auto` = only films that have one)
 - **CAPTURE**: Save RAW (Off / DNG / CRW); Auto camera colour (sets Canon *My Colors* to suit the film, e.g. B/W for Tri-X. Use **P** mode: Auto ignores My Colors)
-- **SCREEN**: Film badge (`● PORTRA  G3  DNG` at the top of the screen), Developing card
+- **SCREEN**: Film badge (film, grain, RAW, battery and free card space in one pill at the top; replaces CHDK's separate battery/space/RAW indicators), Developing card
 - **All CHDK settings**: the full stock CHDK menu
 
 Each shot takes a second or two longer to save while the film is developed.

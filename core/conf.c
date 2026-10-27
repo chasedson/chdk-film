@@ -222,9 +222,9 @@ static ConfInfo osd_conf_info[] = {
 
     CONF_INFO(100, conf.batt_volts_max,                         CONF_FUNC_PTR,  func:get_vbatt_max),
     CONF_INFO(101, conf.batt_volts_min,                         CONF_FUNC_PTR,  func:get_vbatt_min),
-    CONF_INFO(102, conf.batt_perc_show,                         CONF_DEF_VALUE, i:1),
+    CONF_INFO(102, conf.batt_perc_show,                         CONF_DEF_VALUE, i:0),
     CONF_INFO(103, conf.batt_volts_show,                        CONF_DEF_VALUE, i:0),
-    CONF_INFO(104, conf.batt_icon_show,                         CONF_DEF_VALUE, i:1),
+    CONF_INFO(104, conf.batt_icon_show,                         CONF_DEF_VALUE, i:0),
 
     CONF_INFO(110, conf.reader_file,                            CONF_CHAR_PTR,  ptr:"A/CHDK/BOOKS/README.TXT"),
     CONF_INFO(111, conf.reader_pos,                             CONF_DEF_VALUE, i:0),
@@ -279,8 +279,8 @@ static ConfInfo osd_conf_info[] = {
     
     CONF_INFO(180, conf.space_icon_show,                        CONF_DEF_VALUE, i:0),
     CONF_INFO(181, conf.space_perc_show,                        CONF_DEF_VALUE, i:0),
-    CONF_INFO(182, conf.space_mb_show,                          CONF_DEF_VALUE, i:1),
-    CONF_INFO(183, conf.space_bar_show,                         CONF_DEF_VALUE, i:1), 
+    CONF_INFO(182, conf.space_mb_show,                          CONF_DEF_VALUE, i:0),
+    CONF_INFO(183, conf.space_bar_show,                         CONF_DEF_VALUE, i:0), 
     CONF_INFO(184, conf.space_bar_size,                         CONF_DEF_VALUE, i:1), 
     CONF_INFO(185, conf.space_bar_width,                        CONF_DEF_VALUE, i:2), 
     CONF_INFO(186, conf.space_perc_warn,                        CONF_DEF_VALUE, i:10),
@@ -289,7 +289,7 @@ static ConfInfo osd_conf_info[] = {
     CONF_INFO(189, conf.show_partition_nr,                      CONF_DEF_VALUE, i:0),
 
     CONF_INFO(200, conf.show_remaining_raw,                     CONF_DEF_VALUE, i:1),
-    CONF_INFO(201, conf.show_raw_state,                         CONF_DEF_VALUE, i:1),
+    CONF_INFO(201, conf.show_raw_state,                         CONF_DEF_VALUE, i:0),
     CONF_INFO(202, conf.remaining_raw_treshold,                 CONF_DEF_VALUE, i:0),
     CONF_INFO(203, conf.raw_exceptions_warn,                    CONF_DEF_VALUE, i:1),
 
@@ -554,6 +554,7 @@ static ConfInfo conf_info[] = {
     CONF_INFO(274, conf.film_osd,                               CONF_DEF_VALUE, i:1),
     CONF_INFO(275, conf.film_camera_color,                      CONF_DEF_VALUE, i:1),
     CONF_INFO(276, conf.film_dev_screen,                        CONF_DEF_VALUE, i:1),
+    CONF_INFO(277, conf.film_layout,                            CONF_DEF_VALUE, i:0),
 
     CONF_INFO(999, conf.script_allow_lua_native_calls,          CONF_DEF_VALUE, i:0),
 
@@ -988,6 +989,16 @@ void conf_restore()
 #if !defined(OPT_CURVES)
     conf.curve_enable = 0;
 #endif
+
+    // chdk-film: the film badge shows battery, card space and RAW, so hide CHDK's
+    // separate indicators once (they overlapped the badge). Users can turn them back on.
+    if (conf.film_layout < 1)
+    {
+        conf.batt_perc_show = conf.batt_icon_show = 0;
+        conf.space_mb_show = conf.space_bar_show = conf.space_icon_show = conf.space_perc_show = 0;
+        conf.show_raw_state = 0;
+        conf.film_layout = 1;
+    }
 }
 
 int load_config_file(int config_base, const char *filename)

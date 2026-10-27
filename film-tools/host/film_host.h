@@ -43,6 +43,9 @@ extern void shooting_set_prop(int id, int v);
 extern void gui_enum_value_change(int *value, int change, int num_items);
 extern void conf_change_dng(void);
 extern void gui_set_need_restore(void);
+extern unsigned long get_batt_perc(void);
+extern unsigned int GetFreeCardSpaceKb(void);
+extern void TurnOnBackLight(void);
 extern long kbd_get_autoclicked_key(void);
 extern long kbd_is_key_clicked(long key);
 
@@ -80,5 +83,6 @@ extern int  draw_string(int x, int y, const char *s, twoColors cl);
 extern int  draw_string_justified(int x, int y, const char *s, twoColors cl, int xo, int max_width, int justification);
 extern void draw_string_scaled(int x, int y, const char *s, twoColors cl, int xsize, int ysize);
 extern void draw_hline(int x, int y, int len, color cl);
+extern void draw_vline(int x, int y, int len, color cl);
 
 #endif

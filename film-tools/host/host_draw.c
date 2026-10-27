@@ -28,7 +28,7 @@ static void px(int x, int y, color c)
 }
 
 void draw_hline(int x, int y, int len, color cl) { for (int i = 0; i < len; i++) px(x+i, y, cl); }
-static void draw_vline(int x, int y, int len, color cl) { for (int i = 0; i < len; i++) px(x, y+i, cl); }
+void draw_vline(int x, int y, int len, color cl) { for (int i = 0; i < len; i++) px(x, y+i, cl); }
 
 void draw_rectangle(int x1, int y1, int x2, int y2, twoColors cl, int flags)
 {

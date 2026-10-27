@@ -6,6 +6,9 @@
 #include "gui.h"
 #include "gui_draw.h"
 #include "keyboard.h"
+#include "gui_batt.h"
+#include "sd_card.h"
+#include "backlight.h"
 #include "film.h"
 
 /*
@@ -269,6 +272,9 @@ static void dev_card_begin(int amount, int size)
     dev_x = camera_screen.disp_left + (camera_screen.disp_width - DEV_W) / 2;
     dev_y = (camera_screen.height - DEV_H) / 2;
     dev_bar_drawn = 0;
+
+    // Canon darkens the LCD while it captures; ask for the backlight so the card can be seen
+    TurnOnBackLight();
 
     draw_rectangle(dev_x, dev_y, dev_x+DEV_W-1, dev_y+DEV_H-1, MAKE_COLOR(COLOR_BLACK, COLOR_GREY_DK), RECT_BORDER1|DRAW_FILLED|RECT_ROUND_CORNERS);
     draw_string(dev_x+12, dev_y+8, "DEVELOPING", MAKE_COLOR(COLOR_BLACK, COLOR_RED));
@@ -548,33 +554,51 @@ void film_settings_changed(void)
 }
 
 //-------------------------------------------------------------------
-// On-screen badge: "● PORTRA  G3  DNG"
+// Status pill at the top of the shooting screen, replacing CHDK's separate
+// battery / card space / RAW indicators:  ● PORTRA G3 DNG | 87% 1.2G
+
+static int pill_text(int x, int y, const char *t, color fg)
+{
+    draw_string(x, y, t, MAKE_COLOR(COLOR_BLACK, fg));
+    return x + strlen(t) * FONT_WIDTH;
+}
 
 void film_draw_osd(int is_osd_edit)
 {
     apply_camera_colors();
 
-    if (!conf.film_osd || conf.film_stock == 0)
+    if (!conf.film_osd)
         return;
     if (!is_osd_edit && (!camera_info.state.mode_rec || camera_info.state.mode_video || camera_info.state.is_shutter_half_press))
         return;
 
-    static char buf[32];
+    static char grain[8], batt[8], space[8];
+    const char *tag = conf.film_stock ? current_stock()->tag : "NO FILM";
     int amount = grain_amount();
-    sprintf(buf, "%s", current_stock()->tag);
-    if (amount > 0)
-        sprintf(buf + strlen(buf), "  G%d", amount);
-    if (conf.save_raw)
-        sprintf(buf + strlen(buf), "  %s", raw_text());
+    grain[0] = 0;
+    if (conf.film_stock && amount > 0) sprintf(grain, " G%d", amount);
+    const char *raw = conf.save_raw ? (conf.dng_raw ? " DNG" : " CRW") : "";
 
-    int w = strlen(buf) * FONT_WIDTH;
+    int bp = get_batt_perc();
+    sprintf(batt, "%d%%", bp);
+    unsigned mb = GetFreeCardSpaceKb() >> 10;
+    if (mb >= 1024) sprintf(space, " %d.%dG", mb >> 10, ((mb & 1023) * 10) >> 10);
+    else sprintf(space, " %dM", mb);
+
+    int chars = strlen(tag) + strlen(grain) + strlen(raw) + strlen(batt) + strlen(space);
+    int w = chars * FONT_WIDTH + 13 + 12 + 8;       // dot + separator gap + padding
     int h = FONT_HEIGHT;
-    int x = camera_screen.disp_left + (camera_screen.disp_width - w - 18) / 2;
-    int y = 6;
+    int x = camera_screen.disp_left + (camera_screen.disp_width - w) / 2;
+    int y = 4;
 
-    draw_rectangle(x, y, x + w + 18, y + h + 3, MAKE_COLOR(COLOR_BLACK, COLOR_GREY_DK), RECT_BORDER1|DRAW_FILLED|RECT_ROUND_CORNERS);
+    draw_rectangle(x, y, x + w, y + h + 3, MAKE_COLOR(COLOR_BLACK, COLOR_GREY_DK), RECT_BORDER1|DRAW_FILLED|RECT_ROUND_CORNERS);
     draw_rectangle(x + 5, y + h/2 - 1, x + 8, y + h/2 + 2, MAKE_COLOR(COLOR_RED, COLOR_RED), RECT_BORDER0|DRAW_FILLED);
-    draw_string(x + 13, y + 2, buf, MAKE_COLOR(COLOR_BLACK, COLOR_WHITE));
+    int tx = pill_text(x + 13, y + 2, tag, conf.film_stock ? COLOR_WHITE : COLOR_GREY);
+    tx = pill_text(tx, y + 2, grain, COLOR_GREY_LT);
+    tx = pill_text(tx, y + 2, raw, COLOR_GREY_LT);
+    draw_vline(tx + 5, y + 4, h - 4, COLOR_GREY_DK);
+    tx = pill_text(tx + 12, y + 2, batt, bp <= 20 ? COLOR_RED : COLOR_GREY);
+    pill_text(tx, y + 2, space, (mb < 100) ? COLOR_RED : COLOR_GREY);
 }
 
 //-------------------------------------------------------------------
