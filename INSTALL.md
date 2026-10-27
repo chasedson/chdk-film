@@ -137,27 +137,22 @@ With layout A, that's it. Repeat this every time you turn the camera on.
 
 ### Turn on autoboot (layout B, once)
 
-4. Press **Print** (the film picker opens), then **MENU**.
-5. **All CHDK settings → Miscellaneous → SD Card → Make card bootable**.
-6. Turn the camera off. Slide the card's lock switch to **LOCK**.
-7. Turn it on. chdk-film starts by itself, now and every time the card is locked.
+The camera boots from `CHDKBOOT` only if that partition's boot sector is marked with `BOOTDISK`. Mark it from the Mac (needs your password). Replace `diskN` with the card's disk from `diskutil list`:
+
+```bash
+sudo film-tools/make-bootable.sh diskN
+```
+
+The script refuses to run unless `diskN` is an SD card whose first partition is FAT16. It changes only those 8 bytes, reads them back to confirm, and leaves the files alone.
+
+Then:
+
+1. Eject the card and slide its lock switch to **LOCK**.
+2. Put it in the camera and turn it on. chdk-film starts by itself, now and every time the card is locked.
 
 The camera still saves photos to a locked card. The lock only tells it to boot chdk-film.
 
-<details>
-<summary>Alternative: mark the card bootable from the Mac</summary>
-
-This writes `BOOTDISK` at offset 0x40 of the CHDKBOOT partition's boot sector. It needs `sudo`. Replace `diskN`:
-
-```bash
-diskutil unmount /Volumes/CHDKBOOT
-sudo dd if=/dev/rdiskNs1 of=/tmp/bootsector.bin bs=512 count=1
-printf 'BOOTDISK' | dd of=/tmp/bootsector.bin bs=1 seek=64 count=8 conv=notrunc
-sudo dd if=/tmp/bootsector.bin of=/dev/rdiskNs1 bs=512 count=1
-diskutil eject diskN
-```
-
-</details>
+> **Why not CHDK's "Make card bootable" menu item?** On this two-partition layout it doesn't work. Once chdk-film is running, CHDK has switched the camera to the `FILM` partition, so the menu item marks `FILM` rather than `CHDKBOOT`, and the camera never boots from `FILM`.
 
 ## 7. Updating
 
@@ -167,7 +162,7 @@ make PLATFORM=a570 PLATFORMSUB=101a DISABLE_GCC_VERSION_CHECK=1 fir
 film-tools/install-card.sh
 ```
 
-Your settings and photos stay. On an autoboot card you don't need to repeat **Make card bootable**: lock the card and power on.
+Your settings and photos stay. On an autoboot card you don't need to run `make-bootable.sh` again: copying files doesn't touch the boot sector. Lock the card and power on.
 
 ## 8. Using it
 
@@ -190,7 +185,7 @@ See [README.md](README.md) for the film stocks and how the processing works.
 |---|---|
 | Nothing happens / black screen at start-up | Pull the battery and take the card out: the camera is stock again. Check the firmware version (step 2) matches your build, then try a GCC 10 build (see step 3) |
 | **Firm Update** isn't in the menu | The camera must be in **playback** mode, and `PS.FIR` must be in the root of the card it booted from. On the autoboot layout, that's `CHDKBOOT` |
-| Locked card doesn't autoboot | Run **Make card bootable** again with the card unlocked, or use the Mac method in step 6. Make sure the card's lock switch is fully at LOCK |
+| Locked card doesn't autoboot | Run `sudo film-tools/make-bootable.sh diskN` (step 6). Check the card's lock switch is fully at LOCK. Use the Mac script rather than CHDK's own *Make card bootable* menu item, which marks the wrong partition on this layout |
 | Film colours look the same in every mode | Switch to **P** mode, and check **Auto camera colour** is on in the menu |
 | No photos when the card is in the Mac | On the autoboot layout, photos are on the **FILM** drive, not CHDKBOOT |
 | Shots take longer to save | Expected: about 1–2 s per shot to develop the film. Set the film to **Off** to skip processing |

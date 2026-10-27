@@ -78,7 +78,7 @@ make PLATFORM=a570 PLATFORMSUB=101a DISABLE_GCC_VERSION_CHECK=1 fir
 film-tools/install-card.sh
 ```
 
-then start it once from the camera's **Firm Update** menu and choose **Make card bootable**. After that, lock the card and chdk-film starts on its own.
+then mark the card bootable once with `sudo film-tools/make-bootable.sh diskN`. After that, lock the card and chdk-film starts on its own.
 
 ## Development
 
