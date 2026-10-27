@@ -38,6 +38,14 @@ ifdef OPT_WARNINGS
     endif
 endif
 
+# GCC 14+ turns several legacy-C warnings into errors and GCC 15 defaults to C23
+# (where "void f();" means no arguments). Keep CHDK's older C dialect building.
+ifeq ($(shell test $(GCC_VERSION_MAJOR) -ge 14 && echo y),y)
+    CFLAGS+=-std=gnu17 -Wno-error=incompatible-pointer-types -Wno-error=int-conversion \
+            -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=return-mismatch \
+            -Wno-incompatible-pointer-types -Wno-int-conversion
+endif
+
 # -fno-schedule-insns2 for this gcc bug http://gcc.gnu.org/bugzilla/show_bug.cgi?id=38644
 # technically not required for gcc >= 4.6.3, and probably not required for vxworks cams
 # see http://chdk.setepontos.com/index.php?topic=8273.msg100205#msg100205
