@@ -24,7 +24,7 @@ void conf_change_dng(void) {}
 void gui_set_need_restore(void) {}
 unsigned long get_batt_perc(void) { return 87; }
 unsigned int GetFreeCardSpaceKb(void) { return 29 * 1024 * 1024 + 300 * 1024; }
-void TurnOnBackLight(void) {}
+void debug_led(int state) { (void)state; }
 long kbd_get_autoclicked_key(void) { return 0; }
 long kbd_is_key_clicked(long key) { (void)key; return 0; }
 void gui_enum_value_change(int *value, int change, int num_items)

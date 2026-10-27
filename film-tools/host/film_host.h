@@ -45,7 +45,7 @@ extern void conf_change_dng(void);
 extern void gui_set_need_restore(void);
 extern unsigned long get_batt_perc(void);
 extern unsigned int GetFreeCardSpaceKb(void);
-extern void TurnOnBackLight(void);
+extern void debug_led(int state);
 extern long kbd_get_autoclicked_key(void);
 extern long kbd_is_key_clicked(long key);
 

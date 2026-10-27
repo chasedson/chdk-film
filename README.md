@@ -41,9 +41,7 @@ Press **Print** in shooting mode and a film picker appears:
 
 ### Developing
 
-While a shot is processed, a card shows the film, grain and progress:
-
-![developing card](film-tools/ui-developing.png)
+The screen goes dark while the camera captures, so the blue **Print** light blinks while the film is developed, getting faster as it nears done.
 
 ### Menu
 
@@ -51,7 +49,7 @@ Print, then **MENU**:
 
 - **FILM**: Film stock, Grain (`auto` uses the film's own amount), Grain size, Vignette (`Auto` = only films that have one)
 - **CAPTURE**: Save RAW (Off / DNG / CRW); Auto camera colour (sets Canon *My Colors* to suit the film, e.g. B/W for Tri-X. Use **P** mode: Auto ignores My Colors)
-- **SCREEN**: Film badge (film, grain, RAW, battery and free card space in one pill at the top; replaces CHDK's separate battery/space/RAW indicators), Developing card
+- **SCREEN**: Film badge (film, grain, RAW, battery and free card space in one pill at the top; replaces CHDK's separate battery/space/RAW indicators), Blink light while developing
 - **All CHDK settings**: the full stock CHDK menu
 
 Each shot takes a second or two longer to save while the film is developed.
@@ -84,7 +82,7 @@ The build ends up in `bin/`. Copy `DISKBOOT.BIN` and the `CHDK/` folder to the c
 `film-tools/host` compiles the same `film.c` for the Mac:
 
 - `preview` simulates an A570 raw frame from any image and renders every stock plus a contact sheet
-- `ui_preview` draws the picker, badge and developing card at the camera's 360×240 with CHDK's font
+- `ui_preview` draws the picker and badge at the camera's 360×240 with CHDK's font
 
 ```bash
 film-tools/host/build.sh /tmp/filmprev

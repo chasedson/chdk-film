@@ -2218,7 +2218,7 @@ static CMenuItem root_menu_items[] = {
     MENU_ITEM   (0x5c,(int)"Auto camera colour",            MENUITEM_BOOL,          &conf.film_camera_color, 0 ),
     MENU_ITEM   (0x0 ,(int)"SCREEN",                        MENUITEM_SEPARATOR,     0, 0 ),
     MENU_ITEM   (0x5c,(int)"Film badge",                    MENUITEM_BOOL,          &conf.film_osd, 0 ),
-    MENU_ITEM   (0x5c,(int)"Developing card",               MENUITEM_BOOL,          &conf.film_dev_screen, 0 ),
+    MENU_ITEM   (0x5c,(int)"Blink light while developing",  MENUITEM_BOOL,          &conf.film_dev_screen, 0 ),
     MENU_ITEM   (0x0 ,(int)"",                              MENUITEM_SEPARATOR,     0, 0 ),
     MENU_ITEM   (0x20,(int)"All CHDK settings",             MENUITEM_SUBMENU,       &chdk_all_menu, 0 ),
     MENU_ITEM   (0x0 ,(int)"PRINT: quick film picker",      MENUITEM_TEXT,          0, 0 ),

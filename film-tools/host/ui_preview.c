@@ -1,4 +1,4 @@
-// Renders the film picker, shooting badge and developing card as they would
+// Renders the film picker and shooting badge as they would
 // appear on the A570's 360x240 overlay, on top of a dimmed photo standing in
 // for the live view.
 //
@@ -21,7 +21,7 @@ void conf_change_dng(void) {}
 void gui_set_need_restore(void) {}
 unsigned long get_batt_perc(void) { return 87; }
 unsigned int GetFreeCardSpaceKb(void) { return 29 * 1024 * 1024 + 300 * 1024; }
-void TurnOnBackLight(void) {}
+void debug_led(int state) { (void)state; }
 long kbd_get_autoclicked_key(void) { return 0; }
 long kbd_is_key_clicked(long key) { (void)key; return 0; }
 void gui_enum_value_change(int *value, int change, int num_items)
@@ -30,9 +30,6 @@ void gui_enum_value_change(int *value, int change, int num_items)
     if (*value < 0) *value = num_items - 1;
     if (*value >= num_items) *value = 0;
 }
-
-// Defined in film.c but static; re-declared here through a tiny shim
-extern void film_ui_preview_dev_card(int done, int total);
 
 static unsigned char *bg; static int bw, bh;
 
@@ -103,8 +100,5 @@ int main(int argc, char **argv)
 
     conf.film_stock = 9; conf.film_grain = 9; conf.film_grain_size = 3; conf.save_raw = 1; conf.dng_raw = 0;
     paint_bg(); film_picker_draw(1); save(argv[2], "picker_hp5");
-
-    conf.film_stock = 1; conf.film_grain = 0; conf.film_grain_size = 0; conf.save_raw = 1; conf.dng_raw = 1;
-    paint_bg(); film_ui_preview_dev_card(6, 10); save(argv[2], "developing");
     return 0;
 }

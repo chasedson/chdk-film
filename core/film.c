@@ -8,7 +8,7 @@
 #include "keyboard.h"
 #include "gui_batt.h"
 #include "sd_card.h"
-#include "backlight.h"
+#include "debug_led.h"
 #include "film.h"
 
 /*
@@ -257,57 +257,45 @@ static inline void pack8(unsigned char *b, const int *p)
 #endif
 
 //-------------------------------------------------------------------
-// "Developing" card shown while a shot is processed. Drawn from the capture
-// task straight onto the bitmap overlay; the GUI restores the screen afterwards.
+// Developing light: the LCD is dark while the camera captures, so the blue
+// Print LED blinks instead, speeding up as the shot nears done.
 
-#define DEV_W   240
-#define DEV_H   84
-#define BAR_H   4
+#if defined(CAMERA_a570)
+#define DEV_LED_REG     0xc02200C4      // Print button LED, same one debug_led() drives
+#define DEV_LED_ON      0x46
+#endif
 
-static int dev_x, dev_y, dev_bar_drawn;
+static int dev_led_was_on, dev_led_state;
+static long dev_led_next;
 
-static void dev_card_begin(int amount, int size)
+static void dev_light_begin()
 {
-    static char buf[40];
-    dev_x = camera_screen.disp_left + (camera_screen.disp_width - DEV_W) / 2;
-    dev_y = (camera_screen.height - DEV_H) / 2;
-    dev_bar_drawn = 0;
-
-    // Canon darkens the LCD while it captures; ask for the backlight so the card can be seen
-    TurnOnBackLight();
-
-    draw_rectangle(dev_x, dev_y, dev_x+DEV_W-1, dev_y+DEV_H-1, MAKE_COLOR(COLOR_BLACK, COLOR_GREY_DK), RECT_BORDER1|DRAW_FILLED|RECT_ROUND_CORNERS);
-    draw_string(dev_x+12, dev_y+8, "DEVELOPING", MAKE_COLOR(COLOR_BLACK, COLOR_RED));
-    if (conf.save_raw)
-        draw_string_justified(dev_x+12, dev_y+8, conf.dng_raw ? "+ DNG" : "+ CRW", MAKE_COLOR(COLOR_BLACK, COLOR_GREY), 0, DEV_W-24, TEXT_RIGHT);
-    draw_string(dev_x+12, dev_y+28, current_stock()->name, MAKE_COLOR(COLOR_BLACK, COLOR_WHITE));
-    if (amount > 0)
-        sprintf(buf, "Grain %d, %s", amount, size+1 == 1 ? "fine" : size+1 == 2 ? "medium" : "coarse");
-    else
-        strcpy(buf, "No grain");
-    if (current_stock()->vignette && conf.film_vignette) strcat(buf, "  Vignette");
-    draw_string(dev_x+12, dev_y+46, buf, MAKE_COLOR(COLOR_BLACK, COLOR_GREY));
-    draw_rectangle(dev_x+12, dev_y+68, dev_x+DEV_W-13, dev_y+68+BAR_H-1, MAKE_COLOR(COLOR_GREY_DK, COLOR_GREY_DK), RECT_BORDER0|DRAW_FILLED);
+#ifdef DEV_LED_REG
+    dev_led_was_on = (*(volatile long*)DEV_LED_REG == DEV_LED_ON);
+#else
+    dev_led_was_on = 0;
+#endif
+    dev_led_state = 1;
+    debug_led(1);
+    dev_led_next = get_tick_count() + 250;
 }
 
-static void dev_card_progress(int done, int total)
+// Half period goes from 250ms at the start to 50ms at the end
+static void dev_light_progress(int done, int total)
 {
-    int w = (DEV_W - 24) * done / total;
-    if (w > dev_bar_drawn)
+    long now = get_tick_count();
+    if (now >= dev_led_next)
     {
-        draw_rectangle(dev_x+12+dev_bar_drawn, dev_y+68, dev_x+12+w-1, dev_y+68+BAR_H-1, MAKE_COLOR(COLOR_RED, COLOR_RED), RECT_BORDER0|DRAW_FILLED);
-        dev_bar_drawn = w;
+        dev_led_state = !dev_led_state;
+        debug_led(dev_led_state);
+        dev_led_next = now + 250 - 200 * done / total;
     }
 }
 
-#ifdef FILM_HOST_PREVIEW
-// lets film-tools/host/ui_preview render the card without a raw buffer
-void film_ui_preview_dev_card(int done, int total)
+static void dev_light_end()
 {
-    dev_card_begin(grain_amount(), grain_size());
-    dev_card_progress(done, total);
+    debug_led(dev_led_was_on);
 }
-#endif
 
 //-------------------------------------------------------------------
 
@@ -399,7 +387,7 @@ void film_apply(void)
 
     int show_dev = conf.film_dev_screen;
     if (show_dev)
-        dev_card_begin(amount, gsize);
+        dev_light_begin();
 
     // Vignette: separable falloff, per quad column and per row pair
     int vig = s->vignette;
@@ -425,8 +413,8 @@ void film_apply(void)
 
     for (y = y0; y < y1; y += 2)
     {
-        if (show_dev && ((y - y0) & 63) == 0)
-            dev_card_progress(y - y0, y1 - y0);
+        if (show_dev && ((y - y0) & 15) == 0)
+            dev_light_progress(y - y0, y1 - y0);
 
         unsigned char *ra = raw + y*rowlen + x0*GROUP_BYTES;
         unsigned char *rb = ra + rowlen;
@@ -516,10 +504,7 @@ void film_apply(void)
     if (vx) free(vx);
 
     if (show_dev)
-    {
-        dev_card_progress(1, 1);
-        gui_set_need_restore();
-    }
+        dev_light_end();
 #endif
 }
 
