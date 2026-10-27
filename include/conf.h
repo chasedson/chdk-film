@@ -467,6 +467,14 @@ typedef struct
 
     int check_firmware_crc;  // Check firmware CRC on startup. 0 = no. 1 = Check and set to 0. 2 = always
 
+    // Film simulation (see core/film.c)
+    int film_stock;             // index into film_stocks, 0 = off
+    int film_grain;             // 0 = stock default, 1 = off, 2..11 = amount 1..10
+    int film_grain_size;        // 0 = stock default, 1..3 = fine/medium/coarse
+    int film_vignette;          // 0 = off, 1 = as stock
+    int film_osd;               // show film badge on shooting screen
+    int film_camera_color;      // set Canon My Colors to match the stock
+
     // RAW EV Histogram
     int raw_ev_histo_enable;
     OSD_pos raw_ev_histo_pos;

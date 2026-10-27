@@ -203,10 +203,10 @@ static ConfInfo osd_conf_info[] = {
     CONF_INFOC( 52, conf.osd_color,                             CONF_DEF_VALUE, IDX_COLOR_GREY_DK_TRANS,IDX_COLOR_WHITE,1,1),
     CONF_INFOC( 53, conf.osd_color_warn,                        CONF_DEF_VALUE, IDX_COLOR_GREY_DK_TRANS,IDX_COLOR_RED,1,1),
     CONF_INFOC( 54, conf.osd_color_override,                    CONF_DEF_VALUE, IDX_COLOR_GREY_DK_TRANS,IDX_COLOR_RED,1,1),
-    CONF_INFOC( 55, conf.menu_color,                            CONF_DEF_VALUE, IDX_COLOR_GREY_DK,IDX_COLOR_WHITE,1,1),
-    CONF_INFOC( 56, conf.menu_title_color,                      CONF_DEF_VALUE, IDX_COLOR_WHITE,IDX_COLOR_BLACK,1,1),
-    CONF_INFOC( 57, conf.menu_cursor_color,                     CONF_DEF_VALUE, CAM_DEFAULT_MENU_CURSOR_BG,CAM_DEFAULT_MENU_CURSOR_FG,1,1),
-    CONF_INFOC( 58, conf.menu_symbol_color,                     CONF_DEF_VALUE, IDX_COLOR_GREY_DK,IDX_COLOR_WHITE,1,1),
+    CONF_INFOC( 55, conf.menu_color,                            CONF_DEF_VALUE, IDX_COLOR_BLACK,IDX_COLOR_GREY_LT,1,1),
+    CONF_INFOC( 56, conf.menu_title_color,                      CONF_DEF_VALUE, IDX_COLOR_BLACK,IDX_COLOR_WHITE,1,1),
+    CONF_INFOC( 57, conf.menu_cursor_color,                     CONF_DEF_VALUE, IDX_COLOR_GREY_DK,IDX_COLOR_WHITE,1,1),
+    CONF_INFOC( 58, conf.menu_symbol_color,                     CONF_DEF_VALUE, IDX_COLOR_BLACK,IDX_COLOR_GREY,1,1),
     CONF_INFOC( 59, conf.reader_color,                          CONF_DEF_VALUE, IDX_COLOR_GREY,IDX_COLOR_WHITE,1,1),
     CONF_INFOC( 60, conf.grid_color,                            CONF_DEF_VALUE, IDX_COLOR_GREY_DK,IDX_COLOR_WHITE,1,1),
     CONF_INFOC( 61, conf.space_color,                           CONF_DEF_VALUE, IDX_COLOR_GREY_DK_TRANS,IDX_COLOR_WHITE,1,1),
@@ -237,7 +237,7 @@ static ConfInfo osd_conf_info[] = {
     CONF_INFO(120, conf.splash_show,                            CONF_DEF_VALUE, i:1),
    	CONF_INFO(121, conf.start_sound,                            CONF_DEF_VALUE, i:0),
 
-    CONF_INFO(130, conf.menu_symbol_enable,                     CONF_DEF_VALUE, i:1),
+    CONF_INFO(130, conf.menu_symbol_enable,                     CONF_DEF_VALUE, i:0),
     CONF_INFO(131, conf.menu_rbf_file,                          CONF_CHAR_PTR,  ptr:""),
     CONF_INFO(132, conf.menu_symbol_rbf_file,                   CONF_CHAR_PTR,  ptr:DEFAULT_SYMBOL_FILE),
     CONF_INFO(133, conf.menu_select_first_entry,                CONF_DEF_VALUE, i:1),
@@ -546,6 +546,13 @@ static ConfInfo conf_info[] = {
     CONF_INFO(267, conf.raw_ev_histo_save_log,                  CONF_DEF_VALUE, i:0),
     CONF_INFO(268, conf.raw_ev_histo_ettr_pct,                  CONF_DEF_VALUE, i:1),  // .1% (Decimal * 10)
     CONF_INFO(269, conf.raw_ev_histo_save_for_image,            CONF_DEF_VALUE, i:0),
+
+    CONF_INFO(270, conf.film_stock,                             CONF_DEF_VALUE, i:1),
+    CONF_INFO(271, conf.film_grain,                             CONF_DEF_VALUE, i:0),
+    CONF_INFO(272, conf.film_grain_size,                        CONF_DEF_VALUE, i:0),
+    CONF_INFO(273, conf.film_vignette,                          CONF_DEF_VALUE, i:1),
+    CONF_INFO(274, conf.film_osd,                               CONF_DEF_VALUE, i:1),
+    CONF_INFO(275, conf.film_camera_color,                      CONF_DEF_VALUE, i:1),
 
     CONF_INFO(999, conf.script_allow_lua_native_calls,          CONF_DEF_VALUE, i:0),
 

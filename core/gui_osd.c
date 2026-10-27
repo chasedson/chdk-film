@@ -15,6 +15,7 @@
 #include "usb_remote.h"
 #include "modules.h"
 #include "raw_ev_histo.h"
+#include "film.h"
 
 //-------------------------------------------------------------------
 
@@ -1292,6 +1293,7 @@ void gui_draw_osd_elements(int is_osd_edit, int is_zebra)
     {
         gui_osd_draw_state(is_osd_edit);
         gui_osd_draw_raw_info(is_osd_edit);
+        film_draw_osd(is_osd_edit);
         gui_batt_draw_osd(is_osd_edit);
         gui_space_draw_osd(is_osd_edit);
         gui_osd_draw_temp(is_osd_edit);

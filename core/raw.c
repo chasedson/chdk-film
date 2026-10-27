@@ -13,6 +13,7 @@
 #include "ptp.h" // for remotecap constants
 #include "script_api.h" // for script hook
 #include "raw_ev_histo.h"
+#include "film.h"
 
 //-------------------------------------------------------------------
 #ifdef CAM_DATE_FOLDER_NAMING
@@ -282,6 +283,9 @@ void raw_process(void)
     if (conf.curve_enable)
         libcurves->curve_apply();
 #endif
+
+    // After RAW/DNG is written, so the saved raw stays clean and only the JPEG gets the film look
+    film_apply();
 }
 
 //-------------------------------------------------------------------

@@ -721,6 +721,8 @@ static void gui_menu_draw_initial()
     }
 
     rbf_draw_menu_header(x, y-rbf_font_height(), w+wplus, (conf.menu_symbol_enable)?curr_menu->symbol:0, lang_str(curr_menu->title), user_color(conf.menu_title_color));
+    // accent rule under the title
+    draw_hline(x, y-1, w+wplus, COLOR_RED);
 }
 
 //-------------------------------------------------------------------
@@ -764,7 +766,7 @@ static void gui_menu_draw_value(const char *str, int len_str)
 {
     int sw = gui_menu_draw_symbol();
     xx += rbf_draw_string_len(xx, yy, w-len_space*2-len_br-len_str-sw, lang_str(curr_menu->menu[imenu].text), cl);
-    xx += rbf_draw_string(xx, yy, " [", cl);
+    xx += rbf_draw_string(xx, yy, "  ", cl);
     if (gui_menu_curr_item==imenu)
     {
         if (len_str == len_int)
@@ -776,7 +778,7 @@ static void gui_menu_draw_value(const char *str, int len_str)
     }
     xx += rbf_draw_string_right_len(xx, yy, len_str, str, cl);
     rbf_disable_cursor();
-    rbf_draw_string(xx, yy, "] ", cl);
+    rbf_draw_string(xx, yy, "  ", cl);
 }
 
 // Common code extracted from gui_menu_draw for displaying a text menu string
@@ -855,7 +857,7 @@ static void gui_menu_draw_state_value(CMenuItem *c)
         wid -= len_bool;
 
     xx += rbf_draw_string_len(xx, yy, wid, lang_str(text), cl);
-    xx += rbf_draw_string(xx, yy, " [", cl);
+    xx += rbf_draw_string(xx, yy, "  ", cl);
     if ((c[1].type & MENUITEM_MASK) == MENUITEM_ENUM)
         xx += rbf_draw_string_len(xx, yy, len_space*3, c[1].change_function(0, c[1].arg), cl);
     else
@@ -916,7 +918,7 @@ static void gui_menu_draw_state_value(CMenuItem *c)
 
     xx += rbf_draw_string_right_len(xx, yy, len_enum, ch, cl);
     rbf_disable_cursor();
-    rbf_draw_string(xx, yy, "] ", cl);
+    rbf_draw_string(xx, yy, "  ", cl);
 }
 
 //-------------------------------------------------------------------
@@ -1009,15 +1011,15 @@ static void gui_menu_draw(int enforce_redraw)
                 if (lang_str(curr_menu->menu[imenu].text)[0])
                 {
                     char* s = lang_str(curr_menu->menu[imenu].text);
-                    j = (w - rbf_str_width(s)) >> 1;
-                    if (j < 0) j = 0;
-
-                    rbf_draw_clipped_string(x+j, yy, s, cl, 0, w);
-
-                    if (j)
+                    twoColors muted = MAKE_COLOR(BG_COLOR(cl), COLOR_GREY);
+                    j = rbf_draw_clipped_string(x+len_space, yy, s, muted, 0, w-len_space) + len_space*2;
+                    draw_rectangle(x, yy, x+len_space-1, yy+rbf_font_height()-1, MAKE_COLOR(BG_COLOR(cl), BG_COLOR(cl)), RECT_BORDER0|DRAW_FILLED);
+                    if (j < w)
                     {
-                        menu_seperator_line(x, j);
-                        menu_seperator_line(x+w-j, j);
+                        twoColors save = cl;
+                        cl = MAKE_COLOR(BG_COLOR(cl), COLOR_GREY_DK);
+                        menu_seperator_line(x+j, w-j);
+                        cl = save;
                     }
                 }
                 else
@@ -1046,6 +1048,13 @@ static void gui_menu_draw(int enforce_redraw)
             }
         }
 
+        // accent bar marking the selected row
+        if (gui_menu_curr_item >= gui_menu_top_item && gui_menu_curr_item < gui_menu_top_item + num_lines)
+        {
+            int ys = y + (gui_menu_curr_item - gui_menu_top_item) * rbf_font_height();
+            draw_rectangle(x, ys, x+2, ys+rbf_font_height()-1, MAKE_COLOR(COLOR_RED, COLOR_RED), RECT_BORDER0|DRAW_FILLED);
+        }
+
         // scrollbar
         if (count > num_lines)
         {
@@ -1055,7 +1064,7 @@ static void gui_menu_draw(int enforce_redraw)
             i = (h-j)*((gui_menu_curr_item<0)?0:gui_menu_curr_item)/(count-1);   // top pos
             draw_rectangle((x+w)+2, y+1,     (x+w)+6, y+i,    MAKE_COLOR(COLOR_BLACK, COLOR_BLACK), RECT_BORDER0|DRAW_FILLED|RECT_ROUND_CORNERS);
             draw_rectangle((x+w)+2, y+1+i+j, (x+w)+6, y+h,    MAKE_COLOR(COLOR_BLACK, COLOR_BLACK), RECT_BORDER0|DRAW_FILLED|RECT_ROUND_CORNERS);
-            draw_rectangle((x+w)+2, y+1+i,   (x+w)+6, y+i+j,  MAKE_COLOR(COLOR_WHITE, COLOR_WHITE), RECT_BORDER0|DRAW_FILLED|RECT_ROUND_CORNERS);
+            draw_rectangle((x+w)+2, y+1+i,   (x+w)+6, y+i+j,  MAKE_COLOR(COLOR_GREY, COLOR_GREY), RECT_BORDER0|DRAW_FILLED|RECT_ROUND_CORNERS);
         }
     }
 }

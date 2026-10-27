@@ -8,6 +8,7 @@
 #include "gui_lang.h"
 #include "gui_draw.h"
 #include "gui_menu.h"
+#include "film.h"
 #include "gui_user_menu.h"
 #include "gui_mbox.h"
 #include "gui_hexbox.h"
@@ -2188,7 +2189,7 @@ CMenu chdk_settings_menu = {0x20,LANG_MENU_CHDK_SETTINGS, chdk_settings_menu_ite
 
 extern CMenu script_submenu;
 
-static CMenuItem root_menu_items[] = {
+static CMenuItem chdk_all_menu_items[] = {
     MENU_ITEM   (0x21,LANG_MENU_OPERATION_PARAM,            MENUITEM_SUBMENU,   &operation_submenu, 0 ),
     MENU_ITEM   (0x23,LANG_MENU_VIDEO_PARAM,                MENUITEM_SUBMENU,   &video_submenu,     0 ),
     MENU_ITEM   (0x24,LANG_MENU_MAIN_RAW_PARAM,             MENUITEM_SUBMENU,   &raw_submenu,       0 ),
@@ -2198,11 +2199,30 @@ static CMenuItem root_menu_items[] = {
     MENU_ITEM   (0x27,LANG_MENU_MAIN_SCRIPT_PARAM,          MENUITEM_SUBMENU,   &script_submenu,    0 ),
     MENU_ITEM   (0x22,LANG_MENU_CHDK_SETTINGS,              MENUITEM_SUBMENU,   &chdk_settings_menu, 0 ),
     MENU_ITEM   (0x29,LANG_MENU_MAIN_MISC,                  MENUITEM_SUBMENU,   &misc_submenu,      0 ),
+    MENU_ITEM   (0x51,LANG_MENU_BACK,                       MENUITEM_UP, 0, 0 ),
     MENU_ITEM   (0x2e,LANG_MENU_USER_MENU,                  MENUITEM_SUBMENU,   &user_submenu, 0 ),             // Must be last item so it can be disabled
     {0}
 };
 
-CMenu root_menu = {0x20,LANG_MENU_MAIN_TITLE, root_menu_items };
+static CMenu chdk_all_menu = {0x20,(int)"All CHDK settings", chdk_all_menu_items };
+
+// Film menu - the root of this build. Everything stock CHDK offers lives one level down.
+static CMenuItem root_menu_items[] = {
+    MENU_ITEM   (0x0 ,(int)"FILM",                          MENUITEM_SEPARATOR,     0, 0 ),
+    MENU_ITEM   (0x5f,(int)"Stock",                         MENUITEM_ENUM,          gui_film_stock_enum, 0 ),
+    MENU_ITEM   (0x5f,(int)"Grain",                         MENUITEM_ENUM,          gui_film_grain_enum, 0 ),
+    MENU_ITEM   (0x5f,(int)"Grain size",                    MENUITEM_ENUM,          gui_film_grain_size_enum, 0 ),
+    MENU_ITEM   (0x5c,(int)"Vignette",                      MENUITEM_BOOL,          &conf.film_vignette, 0 ),
+    MENU_ITEM   (0x0 ,(int)"CAPTURE",                       MENUITEM_SEPARATOR,     0, 0 ),
+    MENU_ITEM   (0x24,(int)"RAW",                           MENUITEM_ENUM,          gui_film_raw_enum, 0 ),
+    MENU_ITEM   (0x5c,(int)"Match camera colour",           MENUITEM_BOOL,          &conf.film_camera_color, 0 ),
+    MENU_ITEM   (0x5c,(int)"Film badge",                    MENUITEM_BOOL,          &conf.film_osd, 0 ),
+    MENU_ITEM   (0x0 ,(int)"",                              MENUITEM_SEPARATOR,     0, 0 ),
+    MENU_ITEM   (0x20,(int)"All CHDK settings",             MENUITEM_SUBMENU,       &chdk_all_menu, 0 ),
+    {0}
+};
+
+CMenu root_menu = {0x20,(int)"chdk-film", root_menu_items };
 
 //-------------------------------------------------------------------
 
@@ -2258,7 +2278,8 @@ static void init_splash()
 #else   // CHDK-DE
         const char *logo_name="A/CHDK/DATA/logo_de.dat";
 #endif
-        logo = load_file(logo_name, &logo_size, 0);
+        (void)logo_name;    // chdk-film: no CHDK logo, just the text panel
+        logo = NULL;
 
         logo_text_width = 0;
 
@@ -2270,6 +2291,7 @@ static void init_splash()
         }
 
         logo_text_width = logo_text_width * FONT_WIDTH + 10;
+        if (logo_text_width < 28*FONT_WIDTH + 10) logo_text_width = 28*FONT_WIDTH + 10;   // room for "chdk-film" + stock name
     }
 }
 
@@ -2277,7 +2299,7 @@ static void gui_draw_splash()
 {
     coord x, y;
     int i;
-    twoColors cl = MAKE_COLOR(COLOR_RED, COLOR_WHITE);
+    twoColors cl = MAKE_COLOR(COLOR_BLACK, COLOR_GREY_LT);
 
     const color logo_colors[8] =
     {
@@ -2294,7 +2316,11 @@ static void gui_draw_splash()
     x = (camera_screen.width-logo_text_width)>>1; 
     y = ((camera_screen.height-LOGO_TEXT_HEIGHT)>>1) + 20;
 
-    draw_rectangle(x, y, x+logo_text_width, y+LOGO_TEXT_HEIGHT, MAKE_COLOR(COLOR_RED, COLOR_RED), RECT_BORDER0|DRAW_FILLED|RECT_ROUND_CORNERS);
+    // title strip: name + current stock, red rule beneath
+    draw_rectangle(x, y-FONT_HEIGHT-8, x+logo_text_width, y+LOGO_TEXT_HEIGHT, MAKE_COLOR(COLOR_BLACK, COLOR_GREY_DK), RECT_BORDER1|DRAW_FILLED|RECT_ROUND_CORNERS);
+    draw_string_justified(x, y-FONT_HEIGHT-4, "chdk-film", MAKE_COLOR(COLOR_BLACK, COLOR_WHITE), 8, logo_text_width-16, TEXT_LEFT);
+    draw_string_justified(x, y-FONT_HEIGHT-4, film_stocks[conf.film_stock < film_stock_count ? conf.film_stock : 0].name, MAKE_COLOR(COLOR_BLACK, COLOR_RED), 8, logo_text_width-16, TEXT_RIGHT);
+    draw_hline(x+1, y-2, logo_text_width-1, COLOR_RED);
     for (i=0; i<TEXT_COUNT; ++i)
     {
         draw_string_justified(x, y+i*FONT_HEIGHT+4, build_info[i], cl, 0, logo_text_width, TEXT_CENTER);
