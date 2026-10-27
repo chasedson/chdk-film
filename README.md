@@ -54,6 +54,21 @@ Print, then **MENU**:
 
 Each shot takes a second or two longer to save while the film is developed.
 
+## Card setup (autoboot)
+
+The A570 can only boot from a small FAT16 partition, so the card is split in two:
+
+| Partition | Size | Holds |
+|---|---|---|
+| 1 `CHDKBOOT` (FAT16) | 32 MB | `DISKBOOT.BIN`, `PS.FIR`, `CHDK/` – what the camera boots |
+| 2 `FILM` (FAT32) | rest | `DISKBOOT.BIN`, `PS.FIR`, `CHDK/`, photos – CHDK switches to this after loading |
+
+```bash
+diskutil partitionDisk diskN MBR "MS-DOS FAT16" CHDKBOOT 32M "MS-DOS FAT32" FILM R
+```
+
+Copy `DISKBOOT.BIN`, `PS.FIR` and `CHDK/` onto both. Then once, in the camera: start it with **Firm Update**, then **Print → MENU → All CHDK settings → Miscellaneous → SD Card → Make card bootable**. Power off, slide the card's lock switch to **LOCK**, power on: chdk-film starts by itself from then on. To update, copy the new files onto both partitions.
+
 ## How it works
 
 `core/film.c` runs in CHDK's raw hook, after any RAW/DNG has been written and before the camera turns the sensor data into a JPEG. For every 2×2 Bayer quad it:
